@@ -1,11 +1,6 @@
-package org.example;
+package org.taskmanager;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -15,98 +10,85 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GUI extends Frames {
-
     final String nameOfApp = "Task Manager";
-
+    final int maxTasks = 15;
     static JFrame frame;
 
-    JPanel mainPanel;  // panel that will hold sub-panels
-    Box verticalBox;
-    /*
-     * Set up the components that will form the task viewing area
-     */
     static JPanel taskPanel; // holds the tasks
-    JTextArea test;
     JScrollPane taskScroll; // to scroll through tasks
-
-
-    /*
-     * Set up the components that will form the top panel
-     */
-    JPanel topPanel;
-    JLabel appTitle;  // displays name of the application
     JButton addTask;
-    JLabel yourScore;
     JLabel currentScore;   // displays the current score in points
-
-    /*
-     * Set up the components that will form the bottom panel
-     */
-    JPanel bottomPanel;
     JButton viewCompletedTasks;
     JButton viewLeaderboard;
+
+    static List<JPanel> panelList;
 
     public GUI() {
         frame = new JFrame();
         taskPanel = new JPanel();
-        System.out.println("calling cons 2");
+        panelList = new ArrayList<>();
     }
 
     public void createGUI() {
-        mainPanel = new JPanel();
+        JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayout(0, 1));
 
-        verticalBox = Box.createVerticalBox();
-
+        Box verticalBox = Box.createVerticalBox();
 
         taskPanel.setLayout(new BoxLayout(taskPanel, BoxLayout.Y_AXIS));
-        test = new JTextArea(35,20);
         taskScroll = new JScrollPane(taskPanel);
         taskPanel.setAutoscrolls(true);
         taskScroll.setPreferredSize(new Dimension(350, 500));
         taskPanel.setPreferredSize(new Dimension(350, 550));
 
-        topPanel = new JPanel();
+        // Set up the top UI
+        JPanel topPanel = new JPanel();
+        topPanel.setPreferredSize(new Dimension(325,100));
         topPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        appTitle = new JLabel(nameOfApp);
+        JLabel appTitle = new JLabel(nameOfApp);
         addTask = new JButton("+ New Task");
-        yourScore = new JLabel("Your Score: ");
+        JLabel yourScore = new JLabel("Your Score: ");
         currentScore = new JLabel("0");  // 0 for now as placeholder
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.weightx = 0.25;
-        //gbc.weighty = 0.5;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         topPanel.add(appTitle, gbc);
-        gbc.gridy = 1;
-        //gbc.weighty = 0.25;
-        gbc.weightx = 0.5;
-        topPanel.add(addTask, gbc);
-        //gbc.ipady = 15;
+        gbc.weightx = 2;
         gbc.gridy = 0;
-        gbc.gridx = 1;
-        topPanel.add(yourScore, gbc);
-        gbc.ipady = 0;
+        gbc.gridx = 2;
+         topPanel.add(yourScore, gbc);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 0.5;
+        gbc.gridy = 1;
+        gbc.gridx = 0;
+        topPanel.add(addTask, gbc);
+         gbc.weightx = 2;
+        gbc.gridx = 2;
         gbc.gridy = 1;
         topPanel.add(currentScore, gbc);
 
-        bottomPanel = new JPanel();
+        JPanel bottomPanel = new JPanel();
         viewCompletedTasks = new JButton("View Completed Tasks");
         viewLeaderboard = new JButton("View Score Leaderboard");
         bottomPanel.add(viewCompletedTasks);
         bottomPanel.add(viewLeaderboard);
 
         verticalBox.add(topPanel);
-        //verticalBox.add(Box.createGlue());
         verticalBox.add(taskScroll);
-        //verticalBox.add(Box.createVerticalGlue());
         verticalBox.add(bottomPanel);
-
         mainPanel.add(verticalBox);
 
-        addListeners();
+        addTask.addActionListener(e -> {
+            AddTaskWindow atw = new AddTaskWindow();
+            atw.createTaskWindow();
+        });
+
+        populateTaskPanel();
 
         frame.getContentPane().add(mainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -114,22 +96,29 @@ public class GUI extends Frames {
         frame.setVisible(true);
     }
 
-    private void addListeners() {
-
-        addTask.addActionListener(e -> {
-            AddTaskWindow atw = new AddTaskWindow();
-            atw.createTaskWindow();
-        });
-
+    private void populateTaskPanel() {
+        for (int i = 0; i < maxTasks; i++){
+            Task newTask = new Task();
+            newTask.setId(i);
+            TaskDisplay.taskList.add(newTask);
+            JPanel p = new JPanel();
+            panelList.add(p);
+        }
+        for (Task t : TaskDisplay.taskList){
+            taskPanel.add(t.getPanel());
+        }
+    }
+    protected static void addTaskToGUI(Task t){
+        TaskDisplay.addLabelsToPanel(t);
+        t.getPanel().validate();
+        t.getPanel().repaint();
     }
 
-    protected static void updateGUI(){
-        System.out.println(TaskPanel.taskList.size());
-        for ( Task t : TaskPanel.taskList) {
-            JPanel p = TaskPanel.addLabelsToPanel(t);
-            taskPanel.add(p);
-        }
-
+    protected static void removeTaskFromGUI(Task t) {
+        t.setDescription("");
+        t.setDueDate(null);
+        t.setDifficulty(null);
+        taskPanel.remove(t.getPanel());
         taskPanel.validate();
         taskPanel.repaint();
     }

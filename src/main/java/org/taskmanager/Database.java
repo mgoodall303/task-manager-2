@@ -1,4 +1,4 @@
-package org.example;
+package org.taskmanager;
 
 import org.bson.Document;
 

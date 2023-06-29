@@ -1,14 +1,9 @@
-package org.example;
-
-import java.awt.Component;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+package org.taskmanager;
 
 import javax.swing.*;
+import java.awt.*;
 
-
-public class AddTaskWindow extends Frames {
+public abstract class Popup extends Frames {
 
     JLabel taskDescriptionLabel;
     JTextArea taskDescriptionText;
@@ -30,14 +25,7 @@ public class AddTaskWindow extends Frames {
 
     JPanel panel;
 
-    public AddTaskWindow() {
-
-        frame = new JFrame();
-
-        panel = new JPanel();
-
-    }
-
+    Task t;
     public void createTaskWindow() {
         panel.setLayout(new BoxLayout (panel, BoxLayout.Y_AXIS));
 
@@ -49,9 +37,12 @@ public class AddTaskWindow extends Frames {
 
         taskDescriptionLabel = new JLabel("Task description: ");
         taskDescriptionText = new JTextArea(20, 20);
+        JScrollPane scroll = new JScrollPane(taskDescriptionText);
+        scroll.setPreferredSize(new Dimension(300, 150));
+        setDescText();  // Will set contents to text if task is pre-existing
 
         top.add(taskDescriptionLabel);
-        top.add(taskDescriptionText);
+        top.add(scroll);
         top.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JPanel datePanel = new JPanel();
@@ -99,21 +90,26 @@ public class AddTaskWindow extends Frames {
         frame.setVisible(true);
     }
 
-    private void submitListener() {
-
+    protected void addTaskSubmitListener() {
         submit.addActionListener(e -> {
 
             String desc = taskDescriptionText.getText();
             DueDate due = new DueDate(yearText.getText(), (Months) monthSelector.getSelectedItem(), dayText.getText());
             Difficulty diff = (Difficulty) difficultySelector.getSelectedItem();
 
-            Task t = new Task(desc, due, diff, TaskPanel.taskList.size());
-            TaskPanel.addTaskToList(t);
-            GUI.updateGUI();
-
+            TaskDisplay.taskList.get(TaskDisplay.numTasks).setDescription(desc);
+            TaskDisplay.taskList.get(TaskDisplay.numTasks).setDueDate(due);
+            TaskDisplay.taskList.get(TaskDisplay.numTasks).setDifficulty(diff);
+            TaskDisplay.taskList.get(TaskDisplay.numTasks).setDescLabel();
+            TaskDisplay.taskList.get(TaskDisplay.numTasks).setDateLabel();
+            TaskDisplay.taskList.get(TaskDisplay.numTasks).setDiffLabel();
+            GUI.addTaskToGUI(TaskDisplay.taskList.get(TaskDisplay.numTasks));
+            TaskDisplay.numTasks++;
             frame.dispose();
         });
-
     }
 
+    protected abstract void submitListener();
+
+    protected abstract void setDescText();
 }

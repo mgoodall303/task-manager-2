@@ -1,4 +1,4 @@
-package org.example;
+package org.taskmanager;
 
 public enum Difficulty {
     EASY, MEDIUM, HARD
