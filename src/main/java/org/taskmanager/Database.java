@@ -100,7 +100,6 @@ public class Database {
                 int id = doc.getInteger("ID");
                 System.out.println("iddd" + id);
                 Task t = new Task(description, dueDate, Difficulty.valueOf(difficultyStr), id);
-                System.out.println(t.getDescription() + " blah");
                 if (coll.equals("ArchivedTasks")) {
                     DueDate completed = new DueDate();
                     String completedString = doc.getString("Completed");

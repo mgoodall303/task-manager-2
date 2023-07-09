@@ -92,6 +92,7 @@ public class Task {
     public JButton addModifyButton() {
         modify = new JButton("Change");
         modify.addActionListener(e -> {
+            System.out.println(this.getDueDate().toString());
             new ModifyTaskWindow(this);
         });
         return modify;
@@ -135,6 +136,10 @@ public class Task {
                 }
         );
         return complete;
+    }
+
+    public void setDateAndDifficulty(DueDate date, Difficulty difficulty) {
+
     }
     public JButton getModifyButton() {
         return modify;

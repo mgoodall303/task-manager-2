@@ -35,9 +35,15 @@ public class ModifyTaskWindow extends Popup {
 
     }
     @Override
-    protected void setDescText() {
-        System.out.println(this.t.getDescription());
+    protected void setOldValues() {
         taskDescriptionText.setText(t.getDescription());
+        DueDate oldDueDate = t.getDueDate();
+        String year = oldDueDate.year;
+        String day = oldDueDate.day;
+        dayText.setText(day);
+        yearText.setText(year);
+        monthSelector.setSelectedItem(oldDueDate.month);
+        difficultySelector.setSelectedItem(t.getDifficulty());
     }
 
 

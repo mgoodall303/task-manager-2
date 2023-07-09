@@ -144,7 +144,6 @@ public class GUI extends Frames {
                 TaskDisplay.addLabelsToPanel(t);
             }
             panelList.add(t.getPanel());
-            System.out.println("added");
             taskPanel.add(t.getPanel());
         }
     }

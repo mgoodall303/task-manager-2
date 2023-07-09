@@ -61,4 +61,12 @@ public class DueDate {
         this.day = str[1].replace(",", "");
         this.year = str[2];
     }
+
+    public String getYear() {
+        return this.year;
+    }
+
+    public String getDay() {
+        return this.day;
+    }
 }

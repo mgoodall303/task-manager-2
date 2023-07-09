@@ -10,8 +10,12 @@ public class AddTaskWindow extends Popup {
         panel = new JPanel();
     }
 
+    private void openErrorFrame() {
+        JFrame errFrame = new JFrame();
+        JOptionPane.showMessageDialog(errFrame, "Invalid input");
+    }
 @Override
-    protected void submitListener() throws InvalidInputError {
+    protected void submitListener() {
 
         submit.addActionListener(e -> {
 
@@ -19,34 +23,35 @@ public class AddTaskWindow extends Popup {
             String yrText = yearText.getText();
             String dText = dayText.getText();
             Months m = (Months) monthSelector.getSelectedItem();
-
-            DueDate due = new DueDate(yrText, m, dText);
-            String regex = "^\\d+";
-            if (due.hasPassed() || !dText.matches(regex) || !yrText.matches(regex)) {
-                JFrame errFrame = new JFrame();
-                JOptionPane.showMessageDialog(errFrame, "Invalid inputs");
+            if (desc.isEmpty() || yrText.isEmpty() || dText.isEmpty()) {
+                openErrorFrame();
             } else {
-                int day = Integer.parseInt(dText);
-                if (day > m.getDays()) {
-                    JFrame errFrame = new JFrame();
-                    JOptionPane.showMessageDialog(errFrame, "Invalid inputs");
+                DueDate due = new DueDate(yrText, m, dText);
+                String regex = "^\\d+";
+                if (due.hasPassed() || !dText.matches(regex) || !yrText.matches(regex)) {
+                    openErrorFrame();
                 } else {
-                    Difficulty diff = (Difficulty) difficultySelector.getSelectedItem();
-                    int id = TaskDisplay.id;
-                    TaskDisplay.taskList.get(TaskDisplay.numTasks).setId(id);
-                    TaskDisplay.taskList.get(TaskDisplay.numTasks).setDescription(desc);
-                    TaskDisplay.taskList.get(TaskDisplay.numTasks).setDueDate(due);
-                    TaskDisplay.taskList.get(TaskDisplay.numTasks).setDifficulty(diff);
-                    TaskDisplay.taskList.get(TaskDisplay.numTasks).setDescLabel();
-                    TaskDisplay.taskList.get(TaskDisplay.numTasks).setDateLabel();
-                    TaskDisplay.taskList.get(TaskDisplay.numTasks).setDiffLabel();
-                    GUI.addTaskToGUI(TaskDisplay.taskList.get(TaskDisplay.numTasks));
-                    TaskDisplay.numTasks++;
-                    TaskDisplay.id++;
-                    frame.dispose();
-                    //Add to Mongo
-                    Database DB = new Database();
-                    DB.sendData(desc, due.toString(), diff,id);
+                    int day = Integer.parseInt(dText);
+                    if (day > m.getDays()) {
+                        openErrorFrame();
+                    } else {
+                        Difficulty diff = (Difficulty) difficultySelector.getSelectedItem();
+                        int id = TaskDisplay.id;
+                        TaskDisplay.taskList.get(TaskDisplay.numTasks).setId(id);
+                        TaskDisplay.taskList.get(TaskDisplay.numTasks).setDescription(desc);
+                        TaskDisplay.taskList.get(TaskDisplay.numTasks).setDueDate(due);
+                        TaskDisplay.taskList.get(TaskDisplay.numTasks).setDifficulty(diff);
+                        TaskDisplay.taskList.get(TaskDisplay.numTasks).setDescLabel();
+                        TaskDisplay.taskList.get(TaskDisplay.numTasks).setDateLabel();
+                        TaskDisplay.taskList.get(TaskDisplay.numTasks).setDiffLabel();
+                        GUI.addTaskToGUI(TaskDisplay.taskList.get(TaskDisplay.numTasks));
+                        TaskDisplay.numTasks++;
+                        TaskDisplay.id++;
+                        frame.dispose();
+                        //Add to Mongo
+                        Database DB = new Database();
+                        DB.sendData(desc, due.toString(), diff, id);
+                    }
                 }
             }
 
@@ -55,6 +60,6 @@ public class AddTaskWindow extends Popup {
     }
 
     @Override
-    protected void setDescText() {
+    protected void setOldValues() {
     }
 }

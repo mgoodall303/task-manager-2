@@ -39,7 +39,7 @@ public abstract class Popup extends Frames {
         taskDescriptionText = new JTextArea(20, 20);
         JScrollPane scroll = new JScrollPane(taskDescriptionText);
         scroll.setPreferredSize(new Dimension(300, 150));
-        setDescText();  // Will set contents to text if task is pre-existing
+
 
         top.add(taskDescriptionLabel);
         top.add(scroll);
@@ -72,6 +72,8 @@ public abstract class Popup extends Frames {
 
         bottom.add(difficultyLabel);
         bottom.add(difficultySelector);
+
+        setOldValues();  // Will set contents to text if task is pre-existing
 
         submit = new JButton("Add Task");
         submit.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -111,5 +113,5 @@ public abstract class Popup extends Frames {
 
     protected abstract void submitListener();
 
-    protected abstract void setDescText();
+    protected abstract void setOldValues();
 }
