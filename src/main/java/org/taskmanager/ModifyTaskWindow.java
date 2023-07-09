@@ -28,7 +28,8 @@ public class ModifyTaskWindow extends Popup {
             t.setDiffLabel();
 
             GUI.addTaskToGUI(t);
-
+            Database DB = new Database();
+            DB.modTask(desc, due.toString(), diff, t.getId());
             frame.dispose();
         });
 

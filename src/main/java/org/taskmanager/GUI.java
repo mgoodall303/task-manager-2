@@ -1,16 +1,14 @@
 package org.taskmanager;
 
+import com.mongodb.client.*;
+import org.bson.Document;
+
 import java.awt.*;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class GUI extends Frames {
@@ -21,11 +19,13 @@ public class GUI extends Frames {
     static JPanel taskPanel; // holds the tasks
     JScrollPane taskScroll; // to scroll through tasks
     JButton addTask;
-    JLabel currentScore;   // displays the current score in points
+    static JLabel currentScore;   // displays the current score in points
     JButton viewCompletedTasks;
     JButton viewLeaderboard;
 
     static List<JPanel> panelList;
+    PointCalculator pointCalculator;
+    static JTable table;  // hold return from Mongo
 
     public GUI() {
         frame = new JFrame();
@@ -52,12 +52,18 @@ public class GUI extends Frames {
         GridBagConstraints gbc = new GridBagConstraints();
         JLabel appTitle = new JLabel(nameOfApp);
         addTask = new JButton("+ New Task");
+        JPanel spacer = new JPanel();
+        spacer.setPreferredSize(new Dimension(175,50));
         JLabel yourScore = new JLabel("Your Score: ");
-        currentScore = new JLabel("0");  // 0 for now as placeholder
+        currentScore = new JLabel();
+        setScoreLabel();
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         topPanel.add(appTitle, gbc);
+        gbc.gridy = 0;
+        gbc.gridx = 1;
+        topPanel.add(spacer, gbc);
         gbc.weightx = 2;
         gbc.gridy = 0;
         gbc.gridx = 2;
@@ -67,6 +73,9 @@ public class GUI extends Frames {
         gbc.gridy = 1;
         gbc.gridx = 0;
         topPanel.add(addTask, gbc);
+        gbc.gridy = 1;
+        gbc.gridx = 1;
+        topPanel.add(spacer, gbc);
          gbc.weightx = 2;
         gbc.gridx = 2;
         gbc.gridy = 1;
@@ -76,6 +85,22 @@ public class GUI extends Frames {
         viewCompletedTasks = new JButton("View Completed Tasks");
         viewLeaderboard = new JButton("View Score Leaderboard");
         bottomPanel.add(viewCompletedTasks);
+        viewCompletedTasks.addActionListener(e -> {
+            Database db = new Database();
+            JTable jTable = db.displayCompletedTasks();
+            JScrollPane jsp;
+            JLabel noCompletedTasks;
+            JFrame completedTasksFrame = new JFrame("Completed Tasks");
+            if (jTable != null) {
+                jsp = new JScrollPane(jTable);
+                completedTasksFrame.add(jsp);
+            } else {
+                noCompletedTasks = new JLabel("You have not yet completed any tasks.");
+                completedTasksFrame.add(noCompletedTasks);
+            }
+            completedTasksFrame.setSize(400,200);
+            completedTasksFrame.setVisible(true);
+        });
         bottomPanel.add(viewLeaderboard);
 
         verticalBox.add(topPanel);
@@ -96,15 +121,28 @@ public class GUI extends Frames {
         frame.setVisible(true);
     }
 
+    public static void setScoreLabel() {
+        Database db = new Database();
+        currentScore.setText(String.valueOf(db.findPoints()));
+    }
+
     private void populateTaskPanel() {
-        for (int i = 0; i < maxTasks; i++){
+        Database db = new Database();
+        LinkedList<Task> taskLinkedList = db.returnTasks("Tasks");
+        TaskDisplay.setTaskList(taskLinkedList);
+        for (int i = taskLinkedList.size(); i < maxTasks; i++){
             Task newTask = new Task();
             newTask.setId(i);
             TaskDisplay.taskList.add(newTask);
-            JPanel p = new JPanel();
-            panelList.add(p);
+
         }
-        for (Task t : TaskDisplay.taskList){
+        for (int i = 0; i < TaskDisplay.taskList.size(); i++) {
+            Task t = TaskDisplay.taskList.get(i);
+            if (t.isFilledOut) {
+                TaskDisplay.addLabelsToPanel(t);
+            }
+            panelList.add(t.getPanel());
+            System.out.println("added");
             taskPanel.add(t.getPanel());
         }
     }
@@ -118,9 +156,36 @@ public class GUI extends Frames {
         t.setDescription("");
         t.setDueDate(null);
         t.setDifficulty(null);
+        TaskDisplay.numTasks--;
         taskPanel.remove(t.getPanel());
         taskPanel.validate();
         taskPanel.repaint();
+    }
+
+    public void showAllDocuments() {
+        // Clear the table
+        DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
+        tableModel.setRowCount(0);
+
+        try (MongoClient mongoClient = MongoClients.create("mongodb+srv://mgoodall:AILSa27UGi5jFvqD@cluster0.wg6k1fu.mongodb.net/")) {
+            MongoDatabase database = mongoClient.getDatabase("TaskManager686");
+            MongoCollection<Document> collection = database.getCollection("Tasks");
+
+            // Retrieve all documents from the collection
+            FindIterable<Document> documents = collection.find();
+
+            // Iterate through the documents and add them to the table
+            for (Document document : documents) {
+                Object[] rowData = {
+
+                        document.get("Task"),
+                        document.get("Due Date"),
+                        document.get("Difficulty")
+                };
+                tableModel.addRow(rowData);
+            }
+        }
+
     }
 
 }

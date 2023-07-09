@@ -8,9 +8,11 @@ public class TaskDisplay extends JPanel {
 
     static LinkedList<Task> taskList;
     static int numTasks;
+    static int id;
 
     public TaskDisplay() {
         numTasks = 0;
+        id = 0;
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         taskList = new LinkedList<>();
     }
@@ -25,6 +27,7 @@ public class TaskDisplay extends JPanel {
         t.getPanel().add(t.getDescLabel());
         t.getPanel().add(t.getDateLabel());
         t.getPanel().add(t.getDiffLabel());
+        t.getPanel().add(t.spacer);
         t.getPanel().add(t.addModifyButton());
         t.getPanel().add(t.addDeleteButton());
         t.getPanel().add(t.addCompleteCheck());
@@ -37,6 +40,10 @@ public class TaskDisplay extends JPanel {
         t.getPanel().remove(t.getModifyButton());
         t.getPanel().remove(t.getDeleteButton());
         t.getPanel().remove(t.getCompleteCheck());
+    }
+
+    public static void setTaskList(LinkedList<Task> taskLinkedList) {
+        taskList = taskLinkedList;
     }
 
 
