@@ -91,7 +91,6 @@ public class Database {
             while (cursor.hasNext()) {
                 Document doc = cursor.next();
                 String description = doc.getString("Task");
-                System.out.println(description + " descrt");
                 DueDate dueDate = new DueDate();
                 String dueDateStr = doc.getString("Due Date");
                 dueDate.toData(dueDateStr);
@@ -99,9 +98,9 @@ public class Database {
                 String difficultyStr = doc.getString("Difficulty");
 
                 int id = doc.getInteger("ID");
-                System.out.println(id + " ID");
-
+                System.out.println("iddd" + id);
                 Task t = new Task(description, dueDate, Difficulty.valueOf(difficultyStr), id);
+                System.out.println(t.getDescription() + " blah");
                 if (coll.equals("ArchivedTasks")) {
                     DueDate completed = new DueDate();
                     String completedString = doc.getString("Completed");

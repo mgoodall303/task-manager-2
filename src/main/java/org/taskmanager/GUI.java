@@ -114,10 +114,10 @@ public class GUI extends Frames {
         });
 
         populateTaskPanel();
-
         frame.getContentPane().add(mainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(500,750);
+
         frame.setVisible(true);
     }
 
@@ -129,12 +129,14 @@ public class GUI extends Frames {
     private void populateTaskPanel() {
         Database db = new Database();
         LinkedList<Task> taskLinkedList = db.returnTasks("Tasks");
-        TaskDisplay.setTaskList(taskLinkedList);
-        for (int i = taskLinkedList.size(); i < maxTasks; i++){
-            Task newTask = new Task();
-            newTask.setId(i);
-            TaskDisplay.taskList.add(newTask);
+        if (taskLinkedList != null) {
+            TaskDisplay.setTaskList(taskLinkedList);
+            for (int i = taskLinkedList.size(); i < maxTasks; i++) {
+                Task newTask = new Task();
+                newTask.setId(i);
+                TaskDisplay.taskList.add(newTask);
 
+            }
         }
         for (int i = 0; i < TaskDisplay.taskList.size(); i++) {
             Task t = TaskDisplay.taskList.get(i);

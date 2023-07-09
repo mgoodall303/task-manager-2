@@ -1,8 +1,7 @@
 package org.taskmanager;
 import java.util.LinkedList;
 
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class TaskDisplay extends JPanel {
 
@@ -24,7 +23,9 @@ public class TaskDisplay extends JPanel {
     }
 
     public static void addLabelsToPanel(Task t) {
-        t.getPanel().add(t.getDescLabel());
+        JLabel descLab = t.getDescLabel();
+        descLab.setToolTipText(t.getDescription());
+        t.getPanel().add(descLab);
         t.getPanel().add(t.getDateLabel());
         t.getPanel().add(t.getDiffLabel());
         t.getPanel().add(t.spacer);

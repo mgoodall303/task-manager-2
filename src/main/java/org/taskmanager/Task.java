@@ -2,13 +2,15 @@ package org.taskmanager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
+import java.util.Arrays;
 import java.util.Calendar;
 
 public class Task {
 
     private JPanel p;
     public JPanel spacer;
-    final int lineLength = 45;
+    final int lineLength = 4;
 
     private String description;
     private DueDate dueDate;
@@ -31,7 +33,7 @@ public class Task {
 
         p = new JPanel();
         spacer = new JPanel();
-        spacer.setPreferredSize(new Dimension(75,25));
+        spacer.setPreferredSize(new Dimension(25,25));
         isFilledOut = false;
 
     }
@@ -40,7 +42,7 @@ public class Task {
 
         p = new JPanel();
         spacer = new JPanel();
-        spacer.setPreferredSize(new Dimension(75,25));
+        spacer.setPreferredSize(new Dimension(5,25));
 
         this.description = description;
         this.dueDate = date;
@@ -55,16 +57,6 @@ public class Task {
         isFilledOut = true;
 
     }
-
-    public String formatDescription() {
-        int descLength = description.length();
-        int lines = descLength / lineLength;
-        for (int i = 0; i < lines; i++) {
-
-        }
-        return "";
-    }
-
     public String getDescription() {
         return description;
     }
@@ -80,15 +72,18 @@ public class Task {
     public int getId() { return id; }
 
     public JLabel getDescLabel() {
-        descLabel.setPreferredSize(new Dimension(50,25));
+        descLabel.setPreferredSize(new Dimension(75,25));
+        descLabel.setToolTipText(getDescription());
         return descLabel;
     }
 
     public JLabel getDateLabel() {
+        dateLabel.setPreferredSize(new Dimension(130,25));
         return dateLabel;
     }
 
     public JLabel getDiffLabel() {
+        diffLabel.setPreferredSize(new Dimension(50,25));
         return diffLabel;
     }
 
