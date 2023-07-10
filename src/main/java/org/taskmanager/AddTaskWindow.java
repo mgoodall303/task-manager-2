@@ -1,13 +1,12 @@
 package org.taskmanager;
 
 import javax.swing.*;
-import java.util.Random;
-
 public class AddTaskWindow extends Popup {
 
     public AddTaskWindow() {
         frame = new JFrame();
         panel = new JPanel();
+        this.submitString = "Add Task";
     }
 
     private void openErrorFrame() {
@@ -36,21 +35,20 @@ public class AddTaskWindow extends Popup {
                         openErrorFrame();
                     } else {
                         Difficulty diff = (Difficulty) difficultySelector.getSelectedItem();
-                        int id = TaskDisplay.id;
-                        TaskDisplay.taskList.get(TaskDisplay.numTasks).setId(id);
-                        TaskDisplay.taskList.get(TaskDisplay.numTasks).setDescription(desc);
-                        TaskDisplay.taskList.get(TaskDisplay.numTasks).setDueDate(due);
-                        TaskDisplay.taskList.get(TaskDisplay.numTasks).setDifficulty(diff);
-                        TaskDisplay.taskList.get(TaskDisplay.numTasks).setDescLabel();
-                        TaskDisplay.taskList.get(TaskDisplay.numTasks).setDateLabel();
-                        TaskDisplay.taskList.get(TaskDisplay.numTasks).setDiffLabel();
-                        GUI.addTaskToGUI(TaskDisplay.taskList.get(TaskDisplay.numTasks));
+                        int n = TaskDisplay.numTasks;
+                        TaskDisplay.taskList.get(n).setId();
+                        TaskDisplay.taskList.get(n).setDescription(desc);
+                        TaskDisplay.taskList.get(n).setDueDate(due);
+                        TaskDisplay.taskList.get(n).setDifficulty(diff);
+                        TaskDisplay.taskList.get(n).setDescLabel();
+                        TaskDisplay.taskList.get(n).setDateLabel();
+                        TaskDisplay.taskList.get(n).setDiffLabel();
+                        GUI.addTaskToGUI(TaskDisplay.taskList.get(n));
                         TaskDisplay.numTasks++;
-                        TaskDisplay.id++;
                         frame.dispose();
                         //Add to Mongo
                         Database DB = new Database();
-                        DB.sendData(desc, due.toString(), diff, id);
+                        DB.sendData(desc, due.toString(), diff, TaskDisplay.getId());
                     }
                 }
             }

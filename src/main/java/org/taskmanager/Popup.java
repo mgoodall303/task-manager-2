@@ -25,6 +25,8 @@ public abstract class Popup extends Frames {
 
     JPanel panel;
 
+    String submitString = "";
+
     Task t;
     public void createTaskWindow() {
         panel.setLayout(new BoxLayout (panel, BoxLayout.Y_AXIS));
@@ -48,7 +50,7 @@ public abstract class Popup extends Frames {
         JPanel datePanel = new JPanel();
         datePanel.setLayout(new GridLayout(0,3));
 
-        JLabel dueDateLabel = new JLabel("Due Date (optional)");
+        JLabel dueDateLabel = new JLabel("Due Date");
         dueDateLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         dayLabel = new JLabel("Day: ");
         dayText = new JTextArea(1, 2);
@@ -75,7 +77,7 @@ public abstract class Popup extends Frames {
 
         setOldValues();  // Will set contents to text if task is pre-existing
 
-        submit = new JButton("Add Task");
+        submit = new JButton(submitString);
         submit.setAlignmentX(Component.CENTER_ALIGNMENT);
         submitListener();
 

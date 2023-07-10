@@ -8,7 +8,7 @@ public class ModifyTaskWindow extends Popup {
         frame = new JFrame();
         panel = new JPanel();
         this.t = t;
-        System.out.println(t.getDescription());
+        this.submitString = "Change Task";
         createTaskWindow();
     }
 

@@ -11,7 +11,8 @@ public class TaskDisplay extends JPanel {
 
     public TaskDisplay() {
         numTasks = 0;
-        id = 0;
+        Database db = new Database();
+        id = db.getCurrentID() + 1;
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         taskList = new LinkedList<>();
     }
@@ -45,6 +46,11 @@ public class TaskDisplay extends JPanel {
 
     public static void setTaskList(LinkedList<Task> taskLinkedList) {
         taskList = taskLinkedList;
+    }
+
+    public static int getId() {
+        Database db = new Database();
+        return db.getCurrentID() + 1;
     }
 
 

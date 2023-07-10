@@ -7,17 +7,49 @@ import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.Updates;
 import org.bson.Document;
 
-import com.mongodb.MongoException;
-import com.mongodb.client.result.InsertOneResult;
 import org.bson.conversions.Bson;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 public class Database {
-    public static String uri = "mongodb+srv://mgoodall:AILSa27UGi5jFvqD@cluster0.wg6k1fu.mongodb.net/";
+    public static String uri = "mongodb://127.0.0.1:27017/";
+
+    public int getCurrentID() {
+        try (MongoClient mongoClient = MongoClients.create(uri)) {
+            MongoDatabase database = mongoClient.getDatabase("TaskManager686");
+            MongoCollection<Document> collection = database.getCollection("Tasks");
+
+            FindIterable<Document> iterTask = collection.find().sort( new BasicDBObject( "ID" , -1 ) ).limit(1);
+            int id = 0;
+            if (iterTask != null) {
+                for (Document doc : iterTask) {
+                    id = doc.getInteger("ID");
+                }
+            }
+            return id;
+        }
+    }
+
+    public int getIDFromTask(Task t) {
+        try (MongoClient mongoClient = MongoClients.create(uri)) {
+            MongoDatabase database = mongoClient.getDatabase("TaskManager686");
+            MongoCollection<Document> collection = database.getCollection("Tasks");
+            Document document = collection
+                    .find(new BasicDBObject("User", "default"))
+                    .projection(Projections.fields(Projections.include("points"), Projections.excludeId())).first();
+            Integer score = document.getInteger("points");
+            if (score != null) {
+                return score;
+            } else {
+                return 0;
+            }
+
+        } catch (Exception e) {
+            System.out.println("Failed to retrieve points");
+        }
+        return 0;
+    }
 
     public void initiatePoints() {
         try (MongoClient mongoClient = MongoClients.create(uri)) {
@@ -48,20 +80,22 @@ public class Database {
 
     }
 
-    public void deleteTask(Task t) {
-        Document document = new Document("Task", t.getDescription())
-                .append("Due Date", t.getDueDate().toString())
-                .append("Difficulty", t.getDifficulty())
-                .append("ID", t.getId())
-                .append("Completed", t.getDateCompleted().toString());
+    public void deleteTask(Task t, boolean hasBeenCompleted) {
+        Document document = null;
 
         try (MongoClient mongoClient = MongoClients.create(uri)) {
             MongoDatabase database = mongoClient.getDatabase("TaskManager686");
             MongoCollection<Document> collection = database.getCollection("Tasks");
-            MongoCollection<Document> archivedCollection = database.getCollection("ArchivedTasks");
-
-            archivedCollection.insertOne(document);
-            collection.deleteOne(Filters.eq("ID",t.getId()));
+            if (hasBeenCompleted) {
+                document = new Document("Task", t.getDescription())
+                        .append("Due Date", t.getDueDate().toString())
+                        .append("Difficulty", t.getDifficulty())
+                        .append("ID", t.getId())
+                        .append("Completed", t.getDateCompleted().toString());
+                MongoCollection<Document> archivedCollection = database.getCollection("ArchivedTasks");
+                archivedCollection.insertOne(document);
+            }
+            collection.deleteOne(Filters.eq("ID", t.getId()));
 
         }
     }
@@ -70,11 +104,16 @@ public class Database {
         try (MongoClient mongoClient = MongoClients.create(uri)) {
             MongoDatabase database = mongoClient.getDatabase("TaskManager686");
             MongoCollection<Document> collection = database.getCollection("Tasks");
-
-            collection.updateOne(new Document("ID", id),
-                    new Document("Task", desc)
-                            .append("Due Date", due)
-                            .append("Difficulty", diff));
+            BasicDBObject query = new BasicDBObject();
+            query.append("ID", id);
+            Document newDoc = new Document();
+            newDoc.append("Task", desc);
+            newDoc.append("Due Date", due);
+            newDoc.append("Difficulty", diff);
+            newDoc.append("ID", id);
+            Document updateDoc = new Document("$set",newDoc);
+            collection.updateOne(query,
+                    updateDoc);
 
 
         }
@@ -91,15 +130,14 @@ public class Database {
             while (cursor.hasNext()) {
                 Document doc = cursor.next();
                 String description = doc.getString("Task");
-                DueDate dueDate = new DueDate();
+                DueDate dd = new DueDate();
                 String dueDateStr = doc.getString("Due Date");
-                dueDate.toData(dueDateStr);
+                dd.toData(dueDateStr);
 
                 String difficultyStr = doc.getString("Difficulty");
 
                 int id = doc.getInteger("ID");
-                System.out.println("iddd" + id);
-                Task t = new Task(description, dueDate, Difficulty.valueOf(difficultyStr), id);
+                Task t = new Task(description, dd, Difficulty.valueOf(difficultyStr), id);
                 if (coll.equals("ArchivedTasks")) {
                     DueDate completed = new DueDate();
                     String completedString = doc.getString("Completed");
@@ -144,7 +182,6 @@ public class Database {
                     .projection(Projections.fields(Projections.include("points"), Projections.excludeId())).first();
             Integer score = document.getInteger("points");
             if (score != null) {
-                System.out.println(score);
                 return score;
             } else {
                 return 0;
@@ -165,7 +202,7 @@ public class Database {
             database.getCollection("Points").updateOne(Filters.eq("User", "default"), updates);
             Document result = database.getCollection("Points").find(Filters.eq("User", "default")).first();
             if (result != null) {
-                System.out.println("Retrieved Document:\n" + result.toJson());
+
             } else {
                 System.out.println("No documents found.");
             }

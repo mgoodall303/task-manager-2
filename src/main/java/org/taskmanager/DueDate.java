@@ -47,7 +47,7 @@ public class DueDate {
                 return false;
             }
             if (currMonth == intMonth) {
-                if (currDay < intDay) {
+                if (currDay <= intDay) {
                     return false;
                 }
             }
@@ -60,6 +60,9 @@ public class DueDate {
         this.month = Months.valueOf(str[0]);
         this.day = str[1].replace(",", "");
         this.year = str[2];
+        this.intMonth = month.getIndex();
+        this.intYear = Integer.parseInt(year);
+        this.intDay = Integer.parseInt(day);
     }
 
     public String getYear() {
@@ -68,5 +71,14 @@ public class DueDate {
 
     public String getDay() {
         return this.day;
+    }
+
+    public DueDate getCurrentDay() {
+        Calendar cal = Calendar.getInstance();
+        int currYear = cal.get(Calendar.YEAR);
+        int currMonth = cal.get(Calendar.MONTH) + 1;
+        int currDay = cal.get(Calendar.DAY_OF_MONTH);
+        DueDate currentDay = new DueDate(currYear, currMonth, currDay);
+        return currentDay;
     }
 }

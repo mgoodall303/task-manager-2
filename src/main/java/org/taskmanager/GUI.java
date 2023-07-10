@@ -1,15 +1,9 @@
 package org.taskmanager;
 
-import com.mongodb.client.*;
-import org.bson.Document;
-
 import java.awt.*;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 public class GUI extends Frames {
     final String nameOfApp = "Task Manager";
@@ -22,15 +16,11 @@ public class GUI extends Frames {
     static JLabel currentScore;   // displays the current score in points
     JButton viewCompletedTasks;
     JButton viewLeaderboard;
-
-    static List<JPanel> panelList;
-    PointCalculator pointCalculator;
     static JTable table;  // hold return from Mongo
 
     public GUI() {
         frame = new JFrame();
         taskPanel = new JPanel();
-        panelList = new ArrayList<>();
     }
 
     public void createGUI() {
@@ -84,6 +74,7 @@ public class GUI extends Frames {
         JPanel bottomPanel = new JPanel();
         viewCompletedTasks = new JButton("View Completed Tasks");
         viewLeaderboard = new JButton("View Score Leaderboard");
+        viewLeaderboard.setEnabled(false);
         bottomPanel.add(viewCompletedTasks);
         viewCompletedTasks.addActionListener(e -> {
             Database db = new Database();
@@ -121,31 +112,34 @@ public class GUI extends Frames {
         frame.setVisible(true);
     }
 
+    // Used to update the score label
     public static void setScoreLabel() {
         Database db = new Database();
-        currentScore.setText(String.valueOf(db.findPoints()));
+        currentScore.setText(String.valueOf(db.findPoints()));  // called from database
     }
 
+    // Called in beginning to populate screen with JPanels
     private void populateTaskPanel() {
         Database db = new Database();
-        LinkedList<Task> taskLinkedList = db.returnTasks("Tasks");
+        LinkedList<Task> taskLinkedList = db.returnTasks("Tasks");  // Tasks currently in database
         if (taskLinkedList != null) {
             TaskDisplay.setTaskList(taskLinkedList);
             for (int i = taskLinkedList.size(); i < maxTasks; i++) {
                 Task newTask = new Task();
-                newTask.setId(i);
+                newTask.setId();
                 TaskDisplay.taskList.add(newTask);
-
             }
         }
         for (int i = 0; i < TaskDisplay.taskList.size(); i++) {
             Task t = TaskDisplay.taskList.get(i);
             if (t.isFilledOut) {
-                TaskDisplay.addLabelsToPanel(t);
+                addTaskToGUI(t);
+                TaskDisplay.numTasks++;
             }
-            panelList.add(t.getPanel());
+
             taskPanel.add(t.getPanel());
         }
+
     }
     protected static void addTaskToGUI(Task t){
         TaskDisplay.addLabelsToPanel(t);
@@ -161,32 +155,6 @@ public class GUI extends Frames {
         taskPanel.remove(t.getPanel());
         taskPanel.validate();
         taskPanel.repaint();
-    }
-
-    public void showAllDocuments() {
-        // Clear the table
-        DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
-        tableModel.setRowCount(0);
-
-        try (MongoClient mongoClient = MongoClients.create("mongodb+srv://mgoodall:AILSa27UGi5jFvqD@cluster0.wg6k1fu.mongodb.net/")) {
-            MongoDatabase database = mongoClient.getDatabase("TaskManager686");
-            MongoCollection<Document> collection = database.getCollection("Tasks");
-
-            // Retrieve all documents from the collection
-            FindIterable<Document> documents = collection.find();
-
-            // Iterate through the documents and add them to the table
-            for (Document document : documents) {
-                Object[] rowData = {
-
-                        document.get("Task"),
-                        document.get("Due Date"),
-                        document.get("Difficulty")
-                };
-                tableModel.addRow(rowData);
-            }
-        }
-
     }
 
 }

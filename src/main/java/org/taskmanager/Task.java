@@ -2,9 +2,6 @@ package org.taskmanager;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
-import java.util.Arrays;
-import java.util.Calendar;
 
 public class Task {
 
@@ -92,7 +89,6 @@ public class Task {
     public JButton addModifyButton() {
         modify = new JButton("Change");
         modify.addActionListener(e -> {
-            System.out.println(this.getDueDate().toString());
             new ModifyTaskWindow(this);
         });
         return modify;
@@ -118,18 +114,15 @@ public class Task {
                                 "Task completion confirmation",
                                 JOptionPane.YES_NO_OPTION);
                         if (n == JOptionPane.YES_OPTION) {
-                            Calendar cal = Calendar.getInstance();
-                            int currYear = cal.get(Calendar.YEAR);
-                            int currMonth = cal.get(Calendar.MONTH) + 1;
-                            int currDay = cal.get(Calendar.DAY_OF_MONTH);
-                            DueDate currentDay = new DueDate(currYear, currMonth, currDay);
+                            DueDate currentDay = new DueDate().getCurrentDay();
                             this.setDateCompleted(currentDay);
                             Database db = new Database();
                             db.updatePoints(this);
-                            db.deleteTask(this);
+                            db.deleteTask(this, true);
                             GUI.setScoreLabel();
                             GUI.removeTaskFromGUI(this);
                         } else if (n == JOptionPane.NO_OPTION) {
+                            complete.setSelected(false);
                             frame.dispose();
                         }
                     }
@@ -156,8 +149,8 @@ public class Task {
         this.id--;
     }
 
-    public void setId(int id){
-        this.id = id;
+    public void setId(){
+        this.id = TaskDisplay.getId();
     }
 
     public void setDescription(String desc){

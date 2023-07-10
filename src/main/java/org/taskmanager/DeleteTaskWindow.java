@@ -13,7 +13,7 @@ public class DeleteTaskWindow {
                 JOptionPane.YES_NO_OPTION);
         if (n == JOptionPane.YES_OPTION) {
             Database db = new Database();
-            db.deleteTask(t);
+            db.deleteTask(t, false);
             GUI.removeTaskFromGUI(t);
         } else if (n == JOptionPane.NO_OPTION) {
             frame.dispose();
